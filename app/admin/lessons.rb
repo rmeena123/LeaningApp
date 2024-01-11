@@ -19,7 +19,7 @@ ActiveAdmin.register Lesson do
     selectable_column
     id_column
     column :name
-  column 'Description' do |model|
+   column 'Description' do |model|
     sanitize(model.description, tags: [])
   end
     column :name
