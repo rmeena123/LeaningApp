@@ -1,0 +1,22 @@
+<h1>List of Lessons</h1>
+
+<% if @lessons.present? %>
+  <div class="row">
+    <% @lessons.each_with_index do |lesson, index| %>
+      <% if lesson.name.present? %>
+        <div class="col-md-4 mb-4">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Lesson <%= index + 1 %>: <%= lesson.name %></h5>
+              <p class="card-text">
+                <%= link_to 'Read Lesson', lesson_read_homes_path(lesson_id: lesson.id), class: 'btn btn-primary' %>
+              </p>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+<% else %>
+  <p>No lessons available for this course.</p>
+<% end %>

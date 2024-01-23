@@ -1,0 +1,29 @@
+<h1>List of subjects</h1>
+
+<% if @course.subjects.present? %>
+  <div class="row">
+    <% @course.subjects.each do |subject| %>
+      <% if subject.name.present? %>
+        <div class="col-md-3 mb-4">
+          <div class="card" style="width: 100%;">
+            <% if subject.image.present? %>
+              <%= link_to lesson_homes_path(subject_id: subject.id), class: "card-link" do %>
+                <%= image_tag subject.image, class: "card-img-top", alt: "subject Image", size: "300x200" if subject.image.attached? %>
+              <% end %>
+            <% else %>
+              <img src="placeholder_image_url" class="card-img-top" alt="Placeholder Image">
+            <% end %>
+            <div class="card-body">
+              <h5 class="card-title"><%= subject.name %></h5>
+              <p class="card-text">
+               <%= link_to 'Start Test', subject_test_homes_path(subject_id: subject.id, test: true), class: 'btn btn-primary' %>
+              </p>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+<% else %>
+  <p>No subjects available for this course.</p>
+<% end %>

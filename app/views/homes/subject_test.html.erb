@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Page Title</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  <style>
+    #questions-container {
+      max-width: 600px;
+      margin: auto;
+    }
+
+    .question {
+      background-color: #f9f9f9;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      display: none;
+    }
+
+    .question p {
+      margin: 0;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    .submit-answer-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+  <script>
+    $(document).ready(function() {
+      var token = $('meta[name="csrf-token"]').attr('content');
+      $.ajaxSetup({
+        headers: {
+          'X-CSRF-Token': token
+        }
+      });
+       
+      var testStartTime = new Date("<%= @test_star_date %>"); // Set the start time here
+      var testEndTime = new Date("<%=  @test_end_date%>");     // Set the end time here
+      var timerInterval;
+      function updateTimer() {
+        var currentTime = new Date();
+        var timeDifference = testEndTime - currentTime;
+
+        if (timeDifference <= 0) {
+          // Time is up, automatically submit the test
+          clearInterval(timerInterval);
+          submitTest();
+        } else {
+          var minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+          var seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
+
+          // Update the timer display
+          $('#timer').text(minutes + 'm ' + seconds + 's');
+        }
+      }
+
+      function submitTest() {
+        console.log('Time is up! Automatically submitting the test...');
+    
+        $('#test-form').submit();
+      }
+
+      // Start the timer interval
+      timerInterval = setInterval(updateTimer, 1000);
+
+      $('.question:first').show();
+
+      $('.submit-answer-btn').on('click', function(e) {
+        e.preventDefault();
+
+        var answerValue = $('input[name="question_' + $(this).data('question-id') + '"]:checked').val();
+        var questionId = $(this).data('question-id');
+
+        $.ajax({
+          type: 'POST',
+          url: '/homes/ans_submit',
+          data: { question_id: questionId, answer_id: answerValue },
+          success: function(response) {
+            // Handle the response if needed
+            console.log(response);
+          },
+          error: function(error) {
+            console.error(error);
+          }
+        });
+
+        $(this).closest('.question').hide();
+        var nextQuestion = $(this).closest('.question').next('.question');
+        if (nextQuestion.length > 0) {
+          nextQuestion.show();
+        } else {
+          console.log('All questions answered');
+        }
+      });
+    });
+  </script>
+</head>
+<body>
+
+ <body>
+
+ <h1>Question List</h1>
+
+  <% if @questions == "Test is already complete" %>
+    <div id="test-over-message">
+      <p><%= @questions %></p>
+      <!-- You can add any additional content or styling for the message here -->
+    </div>
+  <% elsif @questions.present? %>
+    <%= form_tag('/homes/ans_submit', id: 'test-form') do %>
+      <div id="questions-container">
+        <% @questions.each_with_index do |question, index| %>
+          <div class="question" data-question-id="<%= question.id %>" data-index="<%= index + 1 %>">
+            <p><strong>Question:</strong> <%= question.question %></p>
+            <label>
+              <%= radio_button_tag "question_#{question.id}", 'option_a' %>
+              Option A: <%= question.option_a %>
+            </label>
+            <label>
+              <%= radio_button_tag "question_#{question.id}", 'option_b' %>
+              Option B: <%= question.option_b %>
+            </label>
+            <%= submit_tag 'Submit Answer', class: 'submit-answer-btn', 'data-question-id' => question.id %>
+          </div>
+        <% end %>
+      </div>
+      <div id="timer" style="font-size: 18px; margin-top: 20px;"></div>
+    <% end %>
+  <% else %>
+    <div id="test-over-message">
+      <p>The test is over. No questions available.</p>
+      <!-- You can add any additional content or styling for the message here -->
+    </div>
+  <% end %>
+
+</body>
+</html>

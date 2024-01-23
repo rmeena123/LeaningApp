@@ -1,0 +1,24 @@
+<h1>Courses Available</h1>
+
+<div class="row">
+  <% @courses.each do |course| %>
+    <% if course.name.present? %>
+      <div class="col-md-3 mb-4">
+        <div class="card" style="width: 100%;">
+          <% if course.main_image.present? %>
+            <%= link_to subject_homes_path(course_id: course.id), class: "card-link" do %>
+              <%= image_tag course.main_image, class: "card-img-top", alt: "Course Image", size: "300x200" if course.main_image.attached? %>
+            <% end %>
+          <% else %>
+            <%= link_to subject_homes_path(course_id: course.id), class: "card-link" do %>
+              <img src="placeholder_image_url" class="card-img-top" alt="Placeholder Image">
+            <% end %>
+          <% end %>
+           <div class="card-body">
+             <h5 class="card-title"><%= course.name %></h5>            
+          </div>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+</div>
